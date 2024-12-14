@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionador de Juegos</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #ffffff, #ff0000, #00e1ff, #000dff, #9500ff, #ff0000, #ffffff);
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Ocultar scroll mientras la animación está activa */
+        }
+        #introVideo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 1000;
+            object-fit: cover;
+        }
+        #contenido {
+            display: none;
+            filter: blur(10px); /* Comienza borroso */
+            opacity: 0; /* Comienza invisible */
+            transition: filter 1.5s ease, opacity 1.5s ease; /* Transición de 1.5 segundos */
+        }
+        .contenedor-imagenes {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            margin: 0;
+        }
+        .juego {
+            margin: 10px;
+            text-align: center;
+            position: relative;
+        }
+        .juego img {
+            width: 200px;
+            height: auto;
+        }
+        .juego:first-child img {
+            margin-top: 0; /* Toca el borde superior */
+        }
+        .juego .titulo {
+            margin-top: 5px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+        }
+        .explicacion {
+            margin-top: 5px;
+            font-size: 16px;
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .explicacion:hover {
+            color: darkblue;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+        .modal video {
+            width: 400px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .modal-close {
+            margin-top: 10px;
+            text-align: center;
+            cursor: pointer;
+            color: white;
+            font-size: 18px;
+        }
+        .modal-close:hover {
+            text-decoration: underline;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        #botonDescarga {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 1100;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón de descarga -->
+    <a href="Descargador de juegos.html">
+        <img id="botonDescarga" src="Imagenes/Descarga.png" alt="Descargador de juegos" title="Abrir pantalla para descargar los juegos">
+    </a>
+    
+    </a>
+
+    <!-- Video de inicio -->
+    <video id="introVideo" autoplay muted>
+        <source src="https://github.com/Warriorgame/almacen/blob/main/Seleccionar%20juegos/Inicio.mp4" type="video/mp4">
+        Tu navegador no soporta la reproducción de videos.
+    </video>
+
+    <!-- Contenido principal -->
+    <div id="contenido">
+        <div class="contenedor-imagenes">
+            <!-- Juego 1: Marca de la Parca -->
+            <div class="juego">
+                <a href="https://github.com/Warriorgame/almacen/blob/main/Seleccionar%20juegos/juegos/marca_de_la_parca.html">
+                    <img src="https://github.com/Warriorgame/almacen/blob/main/Seleccionar%20juegos/Imagenes/u.jpg" 
+                         title="Un juego en el cual deberás conseguir sandías esquivando una serie de monstruos. Al conseguir las sandías, te irán dando monedas con las que comprar niveles y objetos para pasártelo. ¿Serás capaz? SOLO DISPONIBLE CON TECLADO Y RATÓN O PANTALLA TÁCTIL">
+                </a>
+                <div class="explicacion" onclick="mostrarVideo('Videos/Anuncio.mp4')">Explicación del juego</div>
+                <div class="titulo">Marca de la Parca</div>
+            </div>
+
+            <!-- Juego 2: Wars Destructor 1vs1 -->
+            <div class="juego">
+                <a href="https://github.com/Warriorgame/almacen/blob/main/Seleccionar%20juegos/juegos/wars_destructor_1vs1.html">
+                    <img src="https://github.com/Warriorgame/almacen/blob/main/Seleccionar%20juegos/Imagenes/Dise%C3%B1o%20sin%20t%C3%ADtulo%20(14).jpg" 
+                         title="Minijuego de dos personas en el que deberéis destruir las torres enemigas con diversos poderes. SOLO DISPONIBLE CON TECLADO Y RATÓN">
+                </a>
+                <div class="explicacion" onclick="mostrarVideo('Videos/animacion2.mp4')">Explicación del juego</div>
+                <div class="titulo">Wars Destructor 1vs1</div>
+            </div>
+
+            <!-- Juego 3: Infinity Plane Destructor -->
+            <div class="juego">
+                <a href="https://github.com/Warriorgame/almacen/blob/main/Seleccionar%20juegos/juegos/infinity_plane_destructor.html">
+                    <img src="https://github.com/Warriorgame/almacen/blob/main/Seleccionar%20juegos/Imagenes/Dise%C3%B1o%20sin%20t%C3%ADtulo%20(16).jpg" 
+                         title="Minijuego en el que deberás disparar a aviones enemigos para que no lleguen al final. Al cabo del tiempo, su velocidad irá incrementando. ¿Hasta cuántos puntos llegarás? SOLO DISPONIBLE CON TECLADO Y RATÓN">
+                </a>
+                <div class="explicacion" onclick="mostrarVideo('Videos/animacion3.mp4')">Explicación del juego</div>
+                <div class="titulo">Infinity Plane Destructor</div>
+            </div>
+        </div>
+
+        <!-- Modal para los videos -->
+        <div class="overlay" id="overlay"></div>
+        <div class="modal" id="modalVideo">
+            <video controls id="videoPlayer">
+                <source src="" type="video/mp4">
+                Tu navegador no soporta la reproducción de este video.
+            </video>
+            <div class="modal-close" onclick="cerrarVideo()">Cerrar</div>
+        </div>
+    </div>
+
+    <script>
+        // Al cargar la página, ocultar contenido y mostrar animación de inicio
+        document.addEventListener('DOMContentLoaded', () => {
+            const introVideo = document.getElementById('introVideo');
+            const contenido = document.getElementById('contenido');
+            const botonDescarga = document.getElementById('botonDescarga');
+
+            introVideo.addEventListener('ended', () => {
+                introVideo.style.display = 'none';
+                contenido.style.display = 'block';
+                botonDescarga.style.display = 'block'; // Mostrar el botón de descarga
+                document.body.style.overflow = 'auto'; // Habilitar scroll después de la animación
+                // Iniciar la transición de desvanecimiento
+                setTimeout(() => {
+                    contenido.style.filter = 'blur(0)';
+                    contenido.style.opacity = '1';
+                }, 50); // Pequeño retraso para activar la transición
+            });
+        });
+
+        // Mostrar el video en el modal
+        function mostrarVideo(ruta) {
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.src = ruta;
+            document.getElementById('modalVideo').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        // Cerrar el modal del video
+        function cerrarVideo() {
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.src = ""; // Limpiar la fuente para detener el video
+            document.getElementById('modalVideo').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
