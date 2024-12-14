@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descargador de Juegos</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #ffffff, #ff0000, #00e1ff, #000dff, #9500ff, #ff0000, #ffffff);
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        #introVideo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 1000;
+            object-fit: cover;
+        }
+        #contenido {
+            display: none;
+            filter: blur(10px);
+            opacity: 0;
+            transition: filter 1.5s ease, opacity 1.5s ease;
+        }
+        .contenedor-imagenes {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: flex-start;
+            overflow-x: auto;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+        }
+        .juego {
+            margin: 5px;
+            text-align: center;
+            flex: 0 0 auto;
+        }
+        .juego img {
+            width: 200px;
+            height: auto;
+            display: block;
+        }
+        .juego .titulo {
+            margin-top: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+        }
+        .explicacion {
+            margin-top: 5px;
+            font-size: 16px;
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .explicacion:hover {
+            color: darkblue;
+        }
+        .btn-descargar {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-descargar:hover {
+            background-color: #218838;
+        }
+        .btn-abrir-seleccionador {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 50px;
+            height: 50px;
+            background: url('Imagenes1/Juego.png') no-repeat center center;
+            background-size: contain;
+            border: none;
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+        .modal video {
+            width: 400px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .modal-close {
+            margin-top: 10px;
+            text-align: center;
+            cursor: pointer;
+            color: white;
+            font-size: 18px;
+        }
+        .modal-close:hover {
+            text-decoration: underline;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Video de inicio -->
+    <video id="introVideo" autoplay muted>
+        <source src="Videos/Inicio.mp4" type="video/mp4">
+        Tu navegador no soporta la reproducción de videos.
+    </video>
+
+    <!-- Contenido principal -->
+    <div id="contenido">
+        <div class="contenedor-imagenes">
+            <!-- Juego 1: Marca de la Parca -->
+            <div class="juego">
+                <img src="imagenes/u.jpg" title="Un juego en el cual deberás conseguir sandías esquivando una serie de monstruos. Al conseguir las sandías, te irán dando monedas con las que comprar niveles y objetos para pasártelo. ¿Serás capaz? SOLO DISPONIBLE PARA PC">
+                <div class="explicacion" onclick="mostrarVideo('Videos/Anuncio.mp4')">Explicación del juego</div>
+                <div class="titulo">Marca de la Parca</div>
+                <button class="btn-descargar" onclick="descargarJuego('juegos/marca-de-la-parca_boxed.exe')">Descargar</button>
+            </div>
+
+            <!-- Juego 2: Wars Destructor 1vs1 -->
+            <div class="juego">
+                <img src="imagenes/Diseño sin título (14).jpg" title="Minijuego de dos personas en el que deberéis destruir las torres enemigas con diversos poderes. SOLO DISPONIBLE PARA PC">
+                <div class="explicacion" onclick="mostrarVideo('Videos/animacion3.mp4')">Explicación del juego</div>
+                <div class="titulo">Wars Destructor 1vs1</div>
+                <button class="btn-descargar" onclick="descargarJuego('juegos/wars-destructor-1-vs-1_boxed.exe')">Descargar</button>
+            </div>
+
+            <!-- Juego 3: Infinity Plane Destructor -->
+            <div class="juego">
+                <img src="imagenes/Diseño sin título (16).jpg" title="Minijuego en el que deberás disparar a aviones enemigos para que no lleguen al final. Al cabo del tiempo, su velocidad irá incrementando. ¿Hasta cuántos puntos llegarás? SOLO DISPONIBLE PARA PC">
+                <div class="explicacion" onclick="mostrarVideo('Videos/animacion3.mp4')">Explicación del juego</div>
+                <div class="titulo">Infinity Plane Destructor</div>
+                <button class="btn-descargar" onclick="descargarJuego('juegos/infinity-plane-destructor_boxed.exe')">Descargar</button>
+            </div>
+        </div>
+
+        <!-- Botón para abrir Seleccionador de juegos -->
+        <button class="btn-abrir-seleccionador" onclick="abrirSeleccionador()" title="Juega a los juegos"></button>
+
+        
+
+        <!-- Modal para los videos -->
+        <div class="overlay" id="overlay"></div>
+        <div class="modal" id="modalVideo">
+            <video controls id="videoPlayer">
+                <source src="" type="video/mp4">
+                Tu navegador no soporta la reproducción de este video.
+            </video>
+            <div class="modal-close" onclick="cerrarVideo()">Cerrar</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const introVideo = document.getElementById('introVideo');
+            const contenido = document.getElementById('contenido');
+            introVideo.addEventListener('ended', () => {
+                introVideo.style.display = 'none';
+                contenido.style.display = 'block';
+                document.body.style.overflow = 'auto';
+                setTimeout(() => {
+                    contenido.style.filter = 'blur(0)';
+                    contenido.style.opacity = '1';
+                }, 50);
+            });
+        });
+
+        function mostrarVideo(ruta) {
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.src = ruta;
+            document.getElementById('modalVideo').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function cerrarVideo() {
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.src = "";
+            document.getElementById('modalVideo').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function descargarJuego(ruta) {
+            const link = document.createElement('a');
+            link.href = ruta;
+            link.download = ruta.split('/').pop();
+            link.click();
+        }
+
+        function abrirSeleccionador() {
+            window.location.href = 'Seleccionador de juegos.html';
+        }
+    </script>
+</body>
+</html>
