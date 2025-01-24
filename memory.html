@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            overflow: hidden;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 40px;
+            color: #fff;
+            text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        #playerSelection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease-in-out;
+        }
+        
+        label {
+            font-size: 1.2rem;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        input, select {
+            padding: 12px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            border: none;
+            margin: 10px;
+            background-color: #ffffff;
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            border: 2px solid #2575fc;
+            outline: none;
+        }
+        
+        button {
+            padding: 14px 28px;
+            font-size: 1.3rem;
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background-color: #ff5a3d;
+            transform: scale(1.05);
+        }
+        
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+        
+        .scoreboard div {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .game-container {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 40px;
+            max-width: 100%;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            justify-items: stretch;
+            animation: fadeIn 1s ease-in-out;
+            transition: all 0.5s ease-in-out;
+        }
+        
+        .card {
+            background-color: #2ecc71;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            color: transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s ease-in-out;
+            width: 90px;
+            height: 90px;
+            position: relative;
+            transform: scale(1);
+        }
+        
+        .card.flipped {
+            background-color: #fff;
+            color: #2ecc71;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card.matched {
+            background-color: #f39c12;
+            color: #fff;
+            cursor: not-allowed;
+            transform: scale(1.1);
+        }
+        
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card .fruit {
+            visibility: hidden;
+            font-size: 3rem;
+            transition: visibility 0s, opacity 0.5s ease;
+            opacity: 0;
+        }
+        
+        .card.flipped .fruit {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        
+        #endGameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        
+        #endGameContainer button {
+            font-size: 1.5rem;
+            padding: 14px 28px;
+            cursor: pointer;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        #endGameContainer button:hover {
+            background-color: #c0392b;
+            transform: scale(1.1);
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        
+        .card.flipped {
+            animation: flipShow 0.6s ease-in-out;
+        }
+        
+        .card:not(.flipped) .fruit {
+            animation: flipHide 0.6s ease-in-out;
+        }
+        
+
+    </style>
+</head>
+<body>
+
+    <h1>Memory</h1>
+
+    <div id="playerSelection">
+        <label for="players">Selecciona el número de jugadores (1-8): </label>
+        <input type="number" id="players" min="1" max="8" value="1">
+        
+        <label for="difficulty">Selecciona la dificultad: </label>
+        <select id="difficulty">
+            <option value="easy">Easy (Mejor de 1)</option>
+            <option value="normal">Normal (Mejor de 3)</option>
+            <option value="hard">Hard (Mejor de 5)</option>
+            <option value="extreme">Extreme (Mejor de 10)</option>
+
+        </select>
+
+        <button onclick="startGame()">Iniciar Juego</button>
+    </div>
+
+    <div class="scoreboard hidden" id="scoreboard"></div>
+
+    <div class="game-container hidden" id="gameContainer"></div>
+
+    <div class="hidden" id="endGameContainer">
+        <button onclick="resetGame()">Volver a Jugar</button>
+    </div>
+
+    <script>
+        let players = [];
+        let currentPlayerIndex = 0;
+        let fruits = ['🍎', '🍌', '🍒', '🍍', '🍉', '🍓', '🍇', '🍊', '🍑', '🍈', '🍍', '🍒', '🍋', '🍏', '🍍', '🍉', '🍊', '🍓', '🍎', '🍈', '🍒', '🍇'];
+        let cards = [];
+        let flippedCards = [];
+        let matchedCards = 0;
+        let totalPairs = 0;
+        let playerAttempts = [];
+        let difficulty = 'easy';
+        let gridSize = 4;
+        let requiredMatches = 1;
+
+        function startGame() {
+            const numPlayers = document.getElementById('players').value;
+            difficulty = document.getElementById('difficulty').value;
+
+            if (numPlayers < 1 || numPlayers > 8) {
+                alert("Por favor, elige un número de jugadores entre 1 y 8.");
+                return;
+            }
+
+            if (difficulty === 'easy') {
+                requiredMatches = 1;
+                gridSize = 4;
+            } else if (difficulty === 'normal') {
+                requiredMatches = 3;
+                gridSize = 6;
+            } else if (difficulty === 'hard') {
+                requiredMatches = 5;
+                gridSize = 8;
+            } else if (difficulty === 'extreme') {
+                requiredMatches = 10;
+                gridSize = 10;
+            } else if (difficulty === 'impossible') {
+                requiredMatches = 20;
+                gridSize = 20;
+            }
+
+            players = [];
+            for (let i = 0; i < numPlayers; i++) {
+                players.push({ name: `Jugador ${i + 1}`, score: 0 });
+                playerAttempts.push(0);
+            }
+
+            currentPlayerIndex = 0;
+            matchedCards = 0;
+
+            document.getElementById('playerSelection').classList.add('hidden');
+            document.getElementById('scoreboard').classList.remove('hidden');
+            document.getElementById('gameContainer').classList.remove('hidden');
+            document.getElementById('endGameContainer').classList.add('hidden');
+
+            updateScoreboard();
+            displayDifficulty();
+
+            totalPairs = (gridSize * gridSize) / 2;
+            const selectedFruits = fruits.slice(0, totalPairs);
+            cards = [...selectedFruits, ...selectedFruits];
+            cards = cards.sort(() => Math.random() - 0.5);
+
+            let gameContainer = document.getElementById('gameContainer');
+            gameContainer.innerHTML = '';
+            
+            gameContainer.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            gameContainer.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+
+            cards.forEach((fruit, index) => {
+                let card = document.createElement('div');
+                card.classList.add('card');
+                card.setAttribute('data-id', index);
+                
+                let fruitSpan = document.createElement('span');
+                fruitSpan.classList.add('fruit');
+                fruitSpan.textContent = fruit;
+                
+                card.appendChild(fruitSpan);
+                card.addEventListener('click', flipCard);
+                gameContainer.appendChild(card);
+            });
+        }
+
+        function displayDifficulty() {
+            const scoreboard = document.getElementById('scoreboard');
+            scoreboard.innerHTML += `
+                <div style="font-size: 1.2rem; font-weight: normal; color: #ecf0f1;">
+                    Dificultad: ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} - Mejor de ${requiredMatches}
+                </div>
+            `;
+        }
+
+        function updateScoreboard() {
+            const scoreboard = document.getElementById('scoreboard');
+            scoreboard.innerHTML = players.map((player, index) => {
+                const isCurrentPlayer = index === currentPlayerIndex ? 'style="color: #3498db; font-weight: bold;"' : '';
+                return `
+                    <div ${isCurrentPlayer}>
+                        ${player.name}: ${player.score} aciertos | Intentos: ${playerAttempts[index]}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function flipCard(event) {
+            let card = event.target;
+            if (card.classList.contains('flipped') || flippedCards.length === 2) {
+                return;
+            }
+            card.classList.add('flipped');
+            flippedCards.push(card);
+            
+            if (flippedCards.length === 2) {
+                checkForMatch();
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            const fruit1 = cards[card1.getAttribute('data-id')];
+            const fruit2 = cards[card2.getAttribute('data-id')];
+        
+            isGameLocked = true; // Bloquea el juego mientras se evalúan las cartas
+        
+            if (fruit1 === fruit2) {
+                players[currentPlayerIndex].score++;
+                matchedCards++;
+        
+                // Verifica si el jugador actual ha alcanzado las coincidencias requeridas
+                if (players[currentPlayerIndex].score >= requiredMatches) {
+                    setTimeout(() => {
+                        endGame(players[currentPlayerIndex]); // Termina el juego si el jugador alcanza la cantidad requerida
+                    }, 1000);
+                    return; // Detiene la lógica restante porque el juego ha terminado
+                }
+        
+                // Verifica si todas las parejas han sido encontradas
+                if (matchedCards === totalPairs) {
+                    setTimeout(() => {
+                        endGame(); // Si todas las casillas han sido emparejadas, termina el juego
+                    }, 1000);
+                    return;
+                }
+        
+                // Actualiza el estado de las cartas como "coincidencia correcta"
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                }, 1000);
+            }
+        
+            // Restablece el estado del juego después de evaluar las cartas
+            setTimeout(() => {
+                flippedCards = [];
+                isGameLocked = false; // Desbloquea el juego
+                currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+                updateScoreboard();
+            }, 1000);
+        }
+        
+        function endGame(winner = null) {
+            isGameLocked = true; // Bloquea el juego tras la victoria
+        
+            let resultMessage;
+        
+            if (winner) {
+                // Si hay un ganador por alcanzar el objetivo
+                resultMessage = `Ganador del juego: ${winner.name} con ${winner.score} puntos! 🎉`;
+            } else {
+                // Si no hay ganador directo, determina al ganador por puntuación
+                const maxScore = Math.max(...players.map(player => player.score));
+                const winners = players.filter(player => player.score === maxScore);
+        
+                if (winners.length === 1) {
+                    resultMessage = `Ganador del juego: ${winners[0].name} con ${winners[0].score} puntos! 🎉`;
+                } else {
+                    const winnerNames = winners.map(winner => winner.name).join(", ");
+                    resultMessage = `Es un empate entre ${winnerNames} con ${maxScore} puntos cada uno! 🤝`;
+                }
+            }
+        
+            // Mostrar alerta con el nombre del ganador
+            alert(resultMessage);
+        
+            // Ocultar el tablero de juego y la puntuación
+            document.getElementById('gameContainer').classList.add('hidden');
+            document.getElementById('scoreboard').classList.add('hidden');
+            
+            // Limpiar cualquier contenido relacionado con el fin del juego (mensaje de victoria)
+            document.getElementById('endGameContainer').classList.remove('hidden');
+            
+            // Mostrar el menú de selección de jugadores y dificultad
+            document.getElementById('playerSelection').classList.remove('hidden');
+        
+            // Resetear las variables del juego
+            players = [];
+            currentPlayerIndex = 0;
+            flippedCards = [];
+            matchedCards = 0;
+            totalPairs = 0;
+            playerAttempts = [];
+            isGameLocked = false;
+            
+            // Limpiar el contenido del tablero
+            document.getElementById('gameContainer').innerHTML = '';
+        }
+        
+    </script>
+
+</body>
+</html>

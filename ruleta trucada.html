@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruleta Aleatoria Dinámica</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e1e2f, #2b2b40);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            color: #fff;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 50px;
+            margin-bottom: 40px;
+            color: #ffcc00;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .input-container {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .input-container input {
+            padding: 15px;
+            font-size: 18px;
+            width: 320px;
+            margin-right: 15px;
+            border-radius: 50px;
+            border: 2px solid #ffcc00;
+            outline: none;
+            background: #33334d;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+            transition: box-shadow 0.3s, border-color 0.3s;
+        }
+
+        .input-container input:focus {
+            box-shadow: 0 0 15px 5px #ffcc00;
+            border-color: #ffcc00;
+        }
+
+        .add-btn {
+            padding: 16px 30px;
+            font-size: 18px;
+            background-color: #ff5733;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s, scale 0.3s;
+        }
+
+        .add-btn:hover {
+            background-color: #e74c3c;
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .ruleta-container {
+            position: relative;
+            width: 480px;
+            height: 480px;
+            margin: 50px auto;
+            border-radius: 50%;
+            box-shadow: 0 15px 60px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+            animation: pulse 3s ease-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .ruleta {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #ddd;
+            transition: transform 5s ease-in-out;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            color: #ffcc00;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+            animation: bounce 1s ease-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .spin-btn {
+            padding: 20px 50px;
+            font-size: 26px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        .spin-btn:hover {
+            background-color: #218838;
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        #resultado {
+            margin-top: 20px; /* Adjusted margin for spacing */
+            font-size: 40px;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            text-align: center;
+        }
+
+        @keyframes fadeInResult {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* Recuadro dorado para la opción ganadora */
+        #opcionGanadora {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background-color: rgba(255, 215, 0, 0.7);
+            padding: 20px;
+            border: 3px solid #ffcc00;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #opcionGanadora p {
+            margin: 0;
+            margin-bottom: 10px;
+        }
+
+        #opcionGanadora button {
+            background-color: transparent;
+            border: none;
+            color: #ffcc00;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px 10px;
+            transition: color 0.3s;
+        }
+
+        #opcionGanadora button:hover {
+            color: #e74c3c;
+        }
+
+        #opcionGanadora input {
+            font-size: 16px;
+            padding: 10px;
+            width: 250px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: 2px solid #ffcc00;
+            background: #33334d;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+        }
+
+        #opcionGanadora input:focus {
+            box-shadow: 0 0 15px 5px #ffcc00;
+            border-color: #ffcc00;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div>
+        <h1>Ruleta Aleatoria Dinámica</h1>
+
+        <div class="input-container">
+            <input type="text" id="nuevaOpcion" placeholder="Añade una opción">
+            <button class="add-btn" onclick="agregarOpcion()">Agregar Opción</button>
+        </div>
+
+        <div class="ruleta-container">
+            <div class="pointer">▼</div>
+            <div class="ruleta" id="ruleta"></div>
+        </div>
+
+        <div class="button-container">
+            <button class="spin-btn" id="girarBtn" onclick="girarRuleta()">Girar</button>
+        </div>
+
+        <div id="resultado"></div> <!-- Resultado debajo del botón girar -->
+
+        <!-- Recuadro dorado con opción ganadora -->
+        <div id="opcionGanadora">
+            <p>Opción Ganadora:</p>
+            <input type="text" id="opcionInput" placeholder="Escribe la opción ganadora" onkeydown="asignarOpcion(event)">
+            <button onclick="ocultarOpcion()">Ocultar</button>
+        </div>
+    </div>
+
+    <script>
+        const ruleta = document.getElementById('ruleta');
+        const resultado = document.getElementById('resultado');
+        const nuevaOpcionInput = document.getElementById('nuevaOpcion');
+        const girarBtn = document.getElementById('girarBtn');
+        const opcionInput = document.getElementById('opcionInput');
+        const opcionGanadoraDiv = document.getElementById('opcionGanadoraDiv'); // Asumiendo que esta es la div que contiene el input para la opción ganadora
+        
+        let opciones = [];
+        let anguloAcumulado = 0;
+        let estaGirando = false;
+        let opcionGanadora = '';  // Aquí guardamos la opción ganadora
+        let opcionGanadoraAsignada = false; // Flag para verificar si la opción ganadora fue asignada
+    
+        const audioGiro = new Audio('https://www.soundjay.com/button/beep-07.wav'); // Audio del giro
+        const audioFinal = new Audio('https://www.soundjay.com/button/beep-09.wav'); // Audio del resultado
+    
+        function dibujarRuleta() {
+            if (opciones.length === 0) {
+                ruleta.innerHTML = "";
+                return;
+            }
+    
+            const totalOpciones = opciones.length;
+            const anguloPorcion = 360 / totalOpciones;
+            const gradientes = opciones.map((_, i) => {
+                const inicio = i * anguloPorcion;
+                const fin = (i + 1) * anguloPorcion;
+                const color = `hsl(${(i * 360 / totalOpciones)}, 70%, 50%)`;
+                return `${color} ${inicio}deg ${fin}deg`;
+            }).join(", ");
+    
+            ruleta.style.backgroundImage = `conic-gradient(${gradientes})`;
+            ruleta.innerHTML = "";
+    
+            opciones.forEach((opcion, i) => {
+                const etiqueta = document.createElement('div');
+                etiqueta.className = 'etiqueta';
+                etiqueta.textContent = opcion;
+    
+                const angulo = i * anguloPorcion + anguloPorcion / 2;
+                etiqueta.style.transform = `rotate(${angulo}deg) translateY(-190px)`;
+                ruleta.appendChild(etiqueta);
+            });
+        }
+    
+        function agregarOpcion() {
+            const nuevaOpcion = nuevaOpcionInput.value.trim();
+            if (nuevaOpcion) {
+                opciones.push(nuevaOpcion);  // Agregar la nueva opción a las opciones
+                nuevaOpcionInput.value = "";
+                dibujarRuleta();
+            } else {
+                alert("Por favor, ingresa una opción válida.");
+            }
+        }
+    
+        function asignarOpcion(event) {
+            if (event.key === 'Enter' && !opcionGanadoraAsignada) {
+                const opcionSeleccionada = opcionInput.value.trim();
+                if (opcionSeleccionada && opciones.length > 0) {
+                    // Asignamos la opción ganadora
+                    opcionGanadora = opcionSeleccionada;
+                    opcionGanadoraAsignada = true;
+                    opcionGanadoraDiv.style.display = 'none'; // Ocultamos la entrada para la opción ganadora
+                    dibujarRuleta(); // Redibujamos la ruleta con la nueva opción ganadora
+                }
+            }
+        }
+    
+        function girarRuleta() {
+            if (estaGirando) return; // Evitar que gire múltiples veces
+    
+            if (opciones.length === 0) {
+                alert("Por favor, agrega opciones antes de girar la ruleta.");
+                return;
+            }
+    
+            if (!opcionGanadoraAsignada) {
+                alert("Por favor, asigna una opción ganadora.");
+                return;
+            }
+    
+            estaGirando = true;
+            const anguloAleatorio = Math.floor(Math.random() * 360);
+            const girosCompletos = 5 * 360;
+            const anguloFinal = anguloAcumulado + girosCompletos + anguloAleatorio;
+    
+            anguloAcumulado = anguloFinal;
+    
+            ruleta.style.transition = "transform 5s ease-in-out";
+            ruleta.style.transform = `rotate(${anguloFinal}deg)`;
+    
+            audioGiro.play();
+    
+            setTimeout(() => {
+                // Aquí calculamos cuál es la opción ganadora según el ángulo final
+                const totalOpciones = opciones.length;
+                const anguloPorcion = 360 / totalOpciones;
+                const anguloPosicion = (anguloFinal % 360);  // Obtener el ángulo final dentro del rango [0, 360)
+                const indiceGanador = Math.floor(anguloPosicion / anguloPorcion);  // Calcular el índice de la opción ganadora
+    
+                // Mostrar el resultado
+                resultado.textContent = `Resultado: ${opciones[indiceGanador]}`;
+                resultado.style.opacity = 1;
+                audioFinal.play();
+                estaGirando = false;
+            }, 5000);
+        }
+    
+        dibujarRuleta();
+    </script>
+    
+        
+            dibujarRuleta();
+        </script>
+        

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://github.com/Warriorgame/almacen/blob/main/!DOCTYPE%20html%20html%20lang=es%20head%20meta%20charset=UTF-8%20meta%20name=viewport%20content=width=device-width,%20initial-scale=1.0%20title3%20en%20Raya%20Mejoradotitle%20style%20body%20%7B%20font-family%20'Poppins',%20Arial,%20sans-ser%20(1).png?raw=true">
+    <title>3 en Raya</title>
+    <title>3 en Raya</title>
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1e1e2f, #3b3b56);
+            color: #ffffff;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 50px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center; /* Para centrar el título */
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #ffd700;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.6);
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            grid-template-rows: repeat(3, 120px);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .cell {
+            width: 120px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            background: radial-gradient(circle, #3b3b56, #2d2d44);
+            border-radius: 15px;
+            box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .cell:hover {
+            transform: scale(1.1);
+            background-color: #505080;
+            box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.5);
+        }
+        .cell.taken {
+            cursor: not-allowed;
+            background-color: #4a4a6a;
+            box-shadow: inset 0px 4px 6px rgba(0, 0, 0, 0.5);
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.8em;
+            color: #ffdd57;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        .turn {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 2em;
+            color: #80dfff;
+        }
+        .scores {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.4);
+            font-size: 1.5em;
+            color: #ffffff;
+            min-width: 250px;
+        }
+        .scores h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+        .scores div {
+            margin: 10px 0;
+            font-size: 1.2em;
+            text-align: left;
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .scores span {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        .reset-button {
+            margin-top: 30px;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            color: #ffffff;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.4);
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .reset-button:hover {
+            background: linear-gradient(135deg, #ff6a5b, #fd9a7e);
+            transform: scale(1.1);
+            box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.5);
+        }
+        .reset-button:active {
+            transform: scale(1.05);
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-area">
+            <h1>3 en Raya</h1> <!-- Título movido dentro de game-area -->
+            <div class="board" id="board"></div>
+            <div class="turn" id="turn">Jugador <span>X</span>, pon tu ficha</div>
+            <div class="message" id="message"></div>
+            <button class="reset-button" id="resetButton">Volver a jugar</button>
+        </div>
+        <div class="scores" id="scores">
+            <h2>Puntuaciones</h2>
+            <div>
+                <span>Jugador X:</span> <span id="scoreX">0</span>
+            </div>
+            <div>
+                <span>Jugador O:</span> <span id="scoreO">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const message = document.getElementById('message');
+        const turnIndicator = document.getElementById('turn');
+        const scoreX = document.getElementById('scoreX');
+        const scoreO = document.getElementById('scoreO');
+        const resetButton = document.getElementById('resetButton');
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let gameState = ['', '', '', '', '', '', '', '', ''];
+        let scores = { X: 0, O: 0 };
+
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]             // Diagonals
+        ];
+
+        function checkWinner() {
+            for (const condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+                    gameActive = false;
+                    message.textContent = `¡El jugador ${gameState[a]} ha ganado!`;
+                    turnIndicator.textContent = '';
+                    scores[gameState[a]]++;
+                    updateScores();
+                    return;
+                }
+            }
+
+            if (!gameState.includes('')) {
+                gameActive = false;
+                message.textContent = '¡Es un empate!';
+                turnIndicator.textContent = '';
+            }
+        }
+
+        function updateScores() {
+            scoreX.textContent = scores.X;
+            scoreO.textContent = scores.O;
+        }
+
+        function handleCellClick(e) {
+            const cell = e.target;
+            const cellIndex = Array.from(board.children).indexOf(cell);
+
+            if (!gameActive) return;
+
+            if (gameState[cellIndex] === '') {
+                gameState[cellIndex] = currentPlayer;
+                cell.textContent = currentPlayer;
+                cell.classList.add('taken');
+                checkWinner();
+                if (gameActive) {
+                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                    turnIndicator.innerHTML = `Jugador <span>${currentPlayer}</span>, pon tu ficha`;
+                }
+            }
+        }
+
+        function createBoard() {
+            gameState = ['', '', '', '', '', '', '', '', ''];
+            board.innerHTML = '';
+            message.textContent = '';
+            turnIndicator.innerHTML = `Jugador <span>X</span>, pon tu ficha`;
+            gameActive = true;
+            currentPlayer = 'X';
+
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.addEventListener('click', handleCellClick);
+                board.appendChild(cell);
+            }
+        }
+
+        resetButton.addEventListener('click', createBoard);
+
+        createBoard();
+    </script>
+</body>
+</html>
