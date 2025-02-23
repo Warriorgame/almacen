@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            background: #E8F9FD; /* Color de fondo suave */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        canvas {
+            display: block;
+            background: linear-gradient(to bottom, #70c5ce, #4ec0ca);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            z-index: 2; /* Coloca los controles sobre el lienzo */
+        }
+
+        button {
+            font-size: 16px;
+            padding: 12px 24px;
+            margin: 0 15px;
+            border: none;
+            border-radius: 10px;
+            background-color: #0091EA;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #007BB5;
+            transform: translateY(-2px); /* Da un efecto de elevación */
+        }
+
+        button:active {
+            transform: translateY(1px); /* Efecto de clic */
+        }
+
+        button:disabled {
+            background-color: #B0BEC5;
+            cursor: not-allowed;
+        }
+
+        /* Agregar un contorno más estilizado alrededor de los controles */
+        .controls {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Estilos para el texto de la puntuación y el estado del juego */
+        .score, .game-over {
+            position: absolute;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 3;
+            text-align: center;
+        }
+
+        .score {
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .game-over {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            color: #F44336;
+        }
+
+    </style>
+</head>
+<body>
+    <audio id="backgroundMusic" preload="auto" loop>
+        <source src="https://warriorgame.github.io/almacen/myedit_ai_sfx_0119122926.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    
+<canvas id="gameCanvas"></canvas>
+<div class="controls">
+    <button id="startButton">Start</button>
+    <button id="pauseButton">Pause</button>
+    <button id="restartButton">Restart</button>
+</div>
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas dimensions
+    canvas.width = 480;
+    canvas.height = 640;
+
+    // Game variables
+    let bird = { x: 50, y: canvas.height / 2, width: 30, height: 40, gravity: 0.6, lift: -6, velocity: 0 };
+    let pipes = [];
+    let score = 0;
+    let isGameOver = false;
+    let isPaused = false;
+    let gameInterval;
+
+    const startButton = document.getElementById('startButton');
+    const pauseButton = document.getElementById('pauseButton');
+    const restartButton = document.getElementById('restartButton');
+
+    // Assets
+    const birdImage = new Image();
+    birdImage.src = 'https://github.com/Warriorgame/almacen/blob/main/Designer__1_-removebg-preview.png?raw=true'; // Bird sprite
+
+    const pipeTopImage = new Image();
+    pipeTopImage.src = 'https://github.com/Warriorgame/almacen/blob/main/sample_0__6___1_-removebg-preview.png?raw=true'; // Pipe top
+
+    const pipeBottomImage = new Image();
+    pipeBottomImage.src = 'https://github.com/Warriorgame/almacen/blob/main/sample_0__6_-removebg-preview.png?raw=true'; // Pipe bottom
+
+    const backgroundImage = new Image();
+    backgroundImage.src = 'https://github.com/Warriorgame/almacen/blob/main/Designer%20(2)-Photoroom.png?raw=true'; // Background
+
+    // Controls
+    document.addEventListener('keydown', () => { if (!isGameOver && !isPaused) bird.velocity = bird.lift; });
+    document.addEventListener('click', () => { if (!isGameOver && !isPaused) bird.velocity = bird.lift; });
+
+    // Pipe settings
+    const pipeWidth = 240; // Tripled pipe width
+    const pipeGap = 120;
+    const pipeSpeed = 2;
+
+    // Spawn pipes
+    function spawnPipe() {
+        const pipeTopHeight = Math.random() * (canvas.height / 2);
+        const pipeBottomHeight = canvas.height - pipeTopHeight - pipeGap;
+
+        pipes.push({
+            x: canvas.width,
+            top: pipeTopHeight,
+            bottom: pipeBottomHeight
+        });
+    }
+
+    function update() {
+        if (isGameOver || isPaused) return;
+
+        // Draw background
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+        // Draw bird
+        ctx.drawImage(birdImage, bird.x, bird.y, bird.width, bird.height);
+
+        // Apply gravity
+        bird.velocity += bird.gravity;
+        bird.y += bird.velocity;
+
+        // Prevent bird from falling through the floor or flying off the top
+        if (bird.y + bird.height > canvas.height || bird.y < 0) {
+            gameOver();
+        }
+
+        // Update and draw pipes
+        for (let i = pipes.length - 1; i >= 0; i--) {
+            const pipe = pipes[i];
+
+            // Move pipes
+            pipe.x -= pipeSpeed;
+
+            // Remove pipes that are off-screen
+            if (pipe.x + pipeWidth < 0) {
+                pipes.splice(i, 1);
+                score++;
+            }
+            
+
+            // Check for collisions using precise hitboxes
+            const birdHitbox = { x: bird.x, y: bird.y, width: bird.width - 99, height: bird.height - 13 }; // Restando 40 a la altura del pájaro
+            const pipeTopHitbox = { x: pipe.x, y: 0, width: pipeWidth - 99, height: pipe.top - 13 }; // Restando 40 a la altura de la tubería superior
+            const pipeBottomHitbox = { x: pipe.x, y: canvas.height - pipe.bottom, width: pipeWidth - 99, height: pipe.bottom - 13 }; // Restando 40 a la altura de la tubería inferior
+
+            if (checkCollision(birdHitbox, pipeTopHitbox) || checkCollision(birdHitbox, pipeBottomHitbox)) {
+                gameOver();
+            }
+
+            // Draw pipes
+            ctx.drawImage(pipeTopImage, pipe.x, 0, pipeWidth, pipe.top);
+            ctx.drawImage(pipeBottomImage, pipe.x, canvas.height - pipe.bottom, pipeWidth, pipe.bottom);
+        }
+
+        // Draw score
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Arial';
+        ctx.fillText(`Score: ${score}`, 10, 30);
+
+        // Spawn new pipes
+        if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 200) {
+            spawnPipe();
+        }
+
+        requestAnimationFrame(update);
+    }
+
+    function checkCollision(birdHitbox, pipeHitbox) {
+        return birdHitbox.x < pipeHitbox.x + pipeHitbox.width &&
+               birdHitbox.x + birdHitbox.width > pipeHitbox.x &&
+               birdHitbox.y < pipeHitbox.y + pipeHitbox.height &&
+               birdHitbox.y + birdHitbox.height > pipeHitbox.y;
+    }
+
+    function gameOver() {
+        isGameOver = true;
+        
+        // Crear el texto de "Game Over"
+        const gameOverText = document.createElement('div');
+        gameOverText.className = 'game-over';
+        gameOverText.innerHTML = `Game Over<br>Final Score: ${score}`;
+        
+        // Añadir el texto al body del documento
+        document.body.appendChild(gameOverText);
+        
+        clearInterval(gameInterval);
+    }
+    
+    function resetGame() {
+        // Eliminar cualquier texto de "Game Over" si existe
+        const gameOverText = document.querySelector('.game-over');
+        if (gameOverText) {
+            gameOverText.remove(); // Elimina el div de "Game Over"
+        }
+        
+        // Restablecer las variables del juego
+        bird = { x: 50, y: canvas.height / 2, width: 30, height: 40, gravity: 0.6, lift: -6, velocity: 0 };
+        pipes = [];
+        score = 0;
+        isGameOver = false;
+        isPaused = false;
+        update();
+    }
+    
+
+    startButton.addEventListener('click', () => {
+        if (!gameInterval) {
+            resetGame();
+            gameInterval = setInterval(update, 1000 / 60);
+        }
+    });
+
+    pauseButton.addEventListener('click', () => {
+        isPaused = !isPaused;
+        if (!isPaused) update();
+    });
+
+    restartButton.addEventListener('click', () => {
+        clearInterval(gameInterval);
+        gameInterval = null;
+        resetGame();
+    });
+    const backgroundMusic = document.getElementById('backgroundMusic');
+
+backgroundMusic.addEventListener('error', (e) => {
+    console.error('Error al cargar el audio:', e);
+});
+
+startButton.addEventListener('click', () => {
+    if (!gameInterval) {
+        resetGame();
+        gameInterval = setInterval(update, 1000 / 60);
+
+        // Intentar reproducir el audio
+        backgroundMusic.play().catch((error) => {
+            console.error('Error al reproducir el audio:', error);
+            alert('El audio no se puede reproducir automáticamente. Permite el sonido en tu navegador.');
+        });
+    }
+});
+
+</script>
+</body>
+</html>
